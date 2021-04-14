@@ -1,5 +1,6 @@
 /*
 Kick Start 2021 - Round A
+K-Goodness String
 https://codingcompetitions.withgoogle.com/kickstart/round/0000000000436140/000000000068cca3
 Charles defines the goodness score of a string as the number of indices i such that Si≠SN−i+1
 where 1≤i≤N/2 (1-indexed). For example, the string CABABC has a goodness score of 2 since S2≠S5
@@ -21,11 +22,10 @@ ABAA             Case #2: 1
 import java.util.Locale;
 import java.util.Scanner;
 
-class KickStartRoundA { //Change to "Soultion" when submitting
+class RoundA_K_GoodnessString { //Change to "Soultion" when submitting
     public static void main(String[] args) {
         long beginTime = System.nanoTime();
         try {
-
             Scanner in = new Scanner(System.in);
             int totalCases = in.nextInt();
             int caseNum = 1;
