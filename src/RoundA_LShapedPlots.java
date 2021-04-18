@@ -1,5 +1,8 @@
 import java.util.*;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+
 /*
 Kick Start 2021 - Round A
 L Shaped Plots
@@ -8,18 +11,24 @@ https://codingcompetitions.withgoogle.com/kickstart/round/0000000000436140/00000
 public class RoundA_LShapedPlots {
     public static void main(String[] args) {
         long beginTime = System.nanoTime();
+
         List<int[][]> input = getInput();
+        int caseNum = 0;
+        int numShapes = 0;
 
         List<Cell[]> hSegments;
         List<Cell[]> vSegments;
 
         for (int[][] grid : input) {
-            System.out.println("Horizontal");
+            caseNum++;
+            //find 'good segments within the grid
+            //System.out.println("Horizontal");
             hSegments = findHSegments(grid.length, grid[0].length, grid);
-            System.out.println("Vertical");
+            //System.out.println("Vertical");
             vSegments = findVSegments(grid.length, grid[0].length, grid);
-            System.out.println("==================");
+            //System.out.println("==================");
 
+            //find the cell common in both directions
             Set<Cell> endPoints = new HashSet<>();
             for (Cell[] vSegment : vSegments) {
                 for (Cell[] hSegment : hSegments) {
@@ -30,65 +39,84 @@ public class RoundA_LShapedPlots {
                     }
                 }
             }
-
-            for (Cell c : endPoints) {
-                System.out.println(c.showCell());
-            }
+            //for (Cell c : endPoints) System.out.println(c.showCell());
 
             int maxUp = 0, maxDown = 0, maxLeft = 0, maxRight = 0, count = 0;
+            Map<String, Integer> maxDirections = new HashMap<>();
             for (Cell temp : endPoints) {
                 //check Up direction
                 for (int z = temp.getRow()-1; z > -1; z--) {
                     if (grid[z][temp.getCol()] == 1) count++;
-                    else count = 0;
-                    if (count > maxUp) maxUp = count;
+                    else break;
+                    if (count > maxUp) {
+                        maxUp = count;
+                        maxDirections.put("up", maxUp+1);
+                        }
                 }
+                maxUp++; //include the Endpoint itself
                 count = 0;
 
                 //check left direction
                 for (int y = temp.getCol()-1; y > -1; y--) {
                     if (grid[temp.getRow()][y] == 1) count++;
-                    else count = 0;
-                    if (count > maxLeft) maxLeft = count;
+                    else break;
+                    if (count > maxLeft) {
+                        maxLeft = count;
+                        maxDirections.put("left", maxLeft+1);
+                    }
                 }
+                maxLeft++; //include the endpoint
                 count = 0;
 
                 //check down direction
                 for (int x = temp.getRow()+1; x < grid.length; x++) {
                     if (grid[x][temp.getCol()] == 1) { count++; }
-                    else { count = 0; }
-                    if(count > maxDown) { maxDown = count; }
+                    else break;
+                    if(count > maxDown) {
+                        maxDown = count;
+                        maxDirections.put("down", maxDown+1);
+                    }
                 }
+                maxDown++;
                 count = 0;
 
                 //check right direction
                 for (int w = temp.getCol()+1; w < grid[0].length; w++) {
                     if (grid[temp.getRow()][w] == 1) { count++; }
-                    else { count = 0; }
-                    if(count > maxRight) { maxRight = count; }
+                    else break;
+                    if(count > maxRight) {
+                        maxRight = count;
+                        maxDirections.put("right", maxRight+1);
+                    }
                 }
+                maxRight++; //include the endpoint
                 count = 0;
 
-                System.out.println(temp.showCell()+":"+maxUp+":"+maxLeft+":"+maxDown+":"+maxRight);
+                //System.out.println(temp.showCell()+":"+maxUp+":"+maxLeft+":"+maxDown+":"+maxRight);
+                numShapes += findLShapes(maxUp, maxLeft, maxDown, maxRight, temp);
+                //System.out.println("Current number of L-shapes: " + numShapes);
 
                 maxUp = maxDown = maxLeft = maxRight = 0;
             }
+            System.out.println("Case #"+caseNum+": "+numShapes);
+            numShapes = 0;
         }
 
-
-        //System.out.println(Arrays.deepToString(input.get(0)) + "::" + Arrays.deepToString(input.get(1)));
         System.err.println("Done in " + ((System.nanoTime() - beginTime) / 1e9) + " seconds.");
     }
 
-    private static int findLShapes(Cell c, List<Cell> vSegments, List<Cell> hSegments, int numRows, int numCols) {
-        int[][] OFFSETS = new int[][]{{-1, 0}, {0, 1}, {1, 0}, {0, -1}};
+    private static int findLShapes(int maxUp, int maxLeft, int maxDown, int maxRight, Cell temp) {
         int count = 0;
-        /*for (int[] offset : OFFSETS) {
-            int row = c.getRow() + offset[0];
-            int col = c.getCol() + offset[1];
-            if (row < 0 || row >= numRows || col < 0 || col >= numCols) { continue; }
-            if ()
-        }*/
+
+        if (maxUp >= 2) count+= max(0, min(maxUp/2, maxLeft)-1);
+        if (maxUp >= 2) count+= max(0, min(maxUp/2, maxRight)-1);
+        if (maxDown >= 2) count+= max(0, min(maxDown/2, maxLeft)-1);
+        if (maxDown >= 2) count+= max(0, min(maxDown/2, maxRight)-1);
+        if (maxLeft >= 2) count+= max(0, min(maxLeft/2, maxUp)-1);
+        if (maxLeft >= 2) count+= max(0, min(maxLeft/2, maxDown)-1);
+        if (maxRight >= 2) count+= max(0, min(maxRight/2, maxUp)-1);
+        if (maxRight >= 2) count+= max(0, min(maxRight/2, maxDown)-1);
+
         return count;
     }
 
@@ -116,9 +144,7 @@ public class RoundA_LShapedPlots {
             count = 1;
             direction.clear();
         }
-        for (Cell[] segment : segments) {
-            for (Cell c : segment) { System.out.println(c.showCell()); }
-        }
+        //for (Cell[] segment : segments) for (Cell c : segment) System.out.println(c.showCell());
         return segments;
     }
 
@@ -146,9 +172,7 @@ public class RoundA_LShapedPlots {
             count = 1;
             direction.clear();
         }
-        for (Cell[] segment : segments) {
-            for (Cell c : segment) { System.out.println(c.showCell()); }
-        }
+        //for (Cell[] segment : segments) for (Cell c : segment) System.out.println(c.showCell());
         return segments;
     }
 
@@ -181,14 +205,9 @@ public class RoundA_LShapedPlots {
             col = c;
         }
 
-        public boolean equals(Cell object) {
-            return object.getRow() == row && object.getCol() == col;
-        }
+        public boolean equals(Cell object) { return object.getRow() == row && object.getCol() == col; }
 
-        public String showCell() {
-            return "("+row+","+col+")";
-            //System.out.println("("+row+","+col+")");
-        }
+        public String showCell() { return "("+row+","+col+")"; }
 
         public int getRow() { return row; }
 
